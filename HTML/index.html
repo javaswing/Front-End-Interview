@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BFC</title>
+</head>
+<style>
+    .container {
+        overflow: hidden;
+    }
+    /* 同一个 BFC 下外边距会发生折叠 */
+    .item {
+        width: 100px;
+        height: 100px;
+        background: blue;
+    }
+    .first {
+        margin-bottom: 20px;
+    }
+    .secound {
+        margin-top: 50px;
+    }
+    /* ） */
+</style>
+<body>
+    <!-- <div class="container">
+        <div class="item first"></div>
+    </div>
+    <div class="container">
+        <div class="item secound"></div>
+    </div> -->
+
+    <!-- <div style="border: 1px solid red;overflow: hidden;">
+        <div>BFC可以包含浮动元素（清除浮动</div>
+        <div style="width: 200px; height: 200px;float:left;background: green;"></div>
+    </div> -->
+
+    <div style="float: left;width: 200px;height: 100px;background: blueviolet">
+        这是一个float:left，且宽度为200px的元素
+    </div>
+    <div  style="float: right;width: 300px;background:cadetblue;">
+    sdfadsf</div>
+    <div style="background: red;height:200px;overflow: auto">
+        我是一个没有设置浮动, 
+        也没有触发 BFC 元素, 
+    </div>
+</body>
+</html>
