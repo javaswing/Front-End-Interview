@@ -128,3 +128,37 @@ Function.prototype.bind = function(context) {
     return fbind
 }
 ```
+
+## 函数柯里化
+
+> 柯里化是指：把一个函数的多个参数，转换成一系列使用一个参数的函数技术。
+
+ES5版本实现
+```js
+function curry (fn, args) {
+     var length = fn.length
+     args = args || []
+     return function () {
+         var totalArgs = args.slice(0)
+         for (let index = 0; index < arguments.length; index++) {
+             const element = arguments[index];
+             totalArgs.push(element)
+         }
+
+         if(totalArgs.length < length) {
+            return curry3.call(this, fn, totalArgs)
+         } else {
+             return fn.apply(this, totalArgs)
+         }
+     }
+}
+```
+
+ES6版本
+> es5中的bind也是函数也是使用函数柯里化实现的，实现柯里化可以借助于这个函数
+
+```js
+function curry (fn, ...args) {
+    return args.length >= fn.length ? fn(...args) : curry.bind(null, fn, ...args)
+}
+```
