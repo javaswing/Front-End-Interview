@@ -23,7 +23,7 @@ console.log(yasuo.constructor === LolRole) // true  实例并没有contructor,�
 
 console.log(Function.__proto__ === Function.prototype) // true
 
-console.log();
+
 
 
 

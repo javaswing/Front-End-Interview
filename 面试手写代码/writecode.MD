@@ -162,3 +162,16 @@ function curry (fn, ...args) {
     return args.length >= fn.length ? fn(...args) : curry.bind(null, fn, ...args)
 }
 ```
+
+## 手动实现new关键字
+
+```js
+function objectFactory (FromFn, ...args) {
+    // 绑定原型
+    var obj = Object.create(FromFn.prototype)
+    // 把传入的参数绑定到对象上
+    var result = FromFn.apply(obj, args)
+    // 如果返回的为null，则返回原对象
+    return typeof result === 'object' ? result || obj : obj
+}
+```
