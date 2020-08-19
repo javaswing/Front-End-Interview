@@ -1,5 +1,24 @@
 ## 手写一个 flatten 函数（数组降维）
 
+```js
+
+
+ var arr1 = [1, 2, 3, 4, 5 , [2, 4, 5], [19, 32, [323]]]
+
+// 1. 使用flat
+ arr1.flat()
+ console.log(arr1.flat(Infinity)); // Infinity 表示无限层
+
+// 2. reduce 
+ function flatten(arr, d= 2) {
+     return d > 0
+        ?  arr.reduce((acc, curr) => acc.concat(Array.isArray(curr)? flatten(curr, d -1): curr), []):
+        arr.slice()
+ }
+
+
+ ```
+
 ## 防抖和节流
 
 ### 防抖
