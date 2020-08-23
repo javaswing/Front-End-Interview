@@ -194,3 +194,7 @@ function objectFactory (FromFn, ...args) {
     return typeof result === 'object' ? result || obj : obj
 }
 ```
+
+## 发布者订阅者模式
+
+

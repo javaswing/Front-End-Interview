@@ -5,7 +5,6 @@
 
 ## js的常见继承
 
-
 ### 原型链继承
 
 ```js
@@ -138,4 +137,17 @@ function inherit(child, parent) {
     child.prototype = prototype
 }
 ```
+
+
+## 箭头函数
+
+1. 没有this，方法里的this是函数最近的一个普通函数的this
+
+2. 没有argument对象
+
+3. 没有super关键字
+
+4. 没有原型prototype
+
+5. 同时也没有constructor不能使用new关键字构造
 
