@@ -56,7 +56,7 @@ function getSidebarConfig(lang: 'zh' | 'en') {
 export default defineConfig({
   doc: {
     // https://modernjs.dev/doc-tools/zh/api/config/config-basic.html
-    base: isProd() ? '/front-end-interview/' : '/',
+    base: isProd() ? '/Front-End-Interview/' : '/',
     root: path.join(__dirname, 'docs'),
     head: [],
     // 默认语言
