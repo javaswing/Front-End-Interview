@@ -7,9 +7,8 @@
 比如:Java中的[`Annotation`](https://www.cnblogs.com/ziph/p/13056092.html)、C#中的[`Attribute`](https://www.cnblogs.com/zuiyirenjian/p/3980608.html)等。
 
 > 由于该特性是目前处于`Stage`阶段，想使用该功能，浏览器都没有支持。在开发中使用一般有两种方法：
-
 > 1. 通过Babel，进行编译通过，插件[@babel/plugin-proposal-decorators](https://babeljs.io/docs/babel-plugin-proposal-decorators)
-  2. 使用`TypeScript`进行编译，（TypeScript在早期的时候本身已经支持`Decorator`，后来由于ECMAScript标准确认时，与早期的语法很有很大的差别。所以在使用时配置是不相同的，见下文）
+> 2. 使用`TypeScript`进行编译，（TypeScript在早期的时候本身已经支持`Decorator`，后来由于ECMAScript标准确认时，与早期的语法很有很大的差别。所以在使用时配置是不相同的，见下文）
 
 > 本文主要在`TypeScript`中使用。演示代码主要在为ts代码.
 
@@ -46,7 +45,7 @@
 ### 类型定义
 先看下在5.0版本中，对于装饰器的定义:
 
-```TypeScript
+```ts
 declare type ClassDecorator = <TFunction extends Function>(target: TFunction) => TFunction | void;
 declare type PropertyDecorator = (target: Object, propertyKey: string | symbol) => void;
 declare type MethodDecorator = <T>(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<T>) => TypedPropertyDescriptor<T> | void;
@@ -78,7 +77,7 @@ class Person {
 
 ### 类饰器
 
-```TypeScript
+```ts
 declare type ClassDecorator = <TFunction extends Function>(target: TFunction) => TFunction | void;
 ```
 
@@ -90,7 +89,7 @@ declare type ClassDecorator = <TFunction extends Function>(target: TFunction) =>
   1. 空
   2. 一个新的构造器函数，如果类装饰器返回了一个值，它将会被用来替代原来的类构造器的声明。
 
-``` TypeScript
+``` ts
 type Constructor = {
   new (...args: any[]): {};
 };
@@ -114,7 +113,7 @@ console.log(t.toString()); // {"name":"javaswing"}
 
 ### 属性装饰器
 
-```TypeScript
+```ts
 declare type PropertyDecorator = (target: Object, propertyKey: string | symbol) => void;
 ```
 
@@ -124,7 +123,7 @@ declare type PropertyDecorator = (target: Object, propertyKey: string | symbol) 
 
 - 返回值：空
 
-```TypeScript
+```ts
 const Valid: (m: number, n: number) => PropertyDecorator = (min: number, max: number) => {
   return (target: Object, key: string) => {
     Object.defineProperty(target, key, {
@@ -150,7 +149,7 @@ const s = new Student();
 
 ### 方法装饰器
 
-```TypeScript
+```ts
 declare type MethodDecorator = <T>(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<T>) => TypedPropertyDescriptor<T> | void;
 ```
 
@@ -163,7 +162,7 @@ declare type MethodDecorator = <T>(target: Object, propertyKey: string | symbol,
   1. 处理后的新方法，可以覆盖原始方法
   2. 空
 
-```TypeScript
+```ts
 const logger: MethodDecorator = (
   target: any,
   propertyKey: string | symbol,
@@ -193,7 +192,7 @@ new C().add(3, 2);
 
 ### 参数装饰器
 
-```TypeScript
+```ts
 declare type ParameterDecorator = (target: Object, propertyKey: string | symbol | undefined, parameterIndex: number) => void;
 ```
 
@@ -205,7 +204,7 @@ declare type ParameterDecorator = (target: Object, propertyKey: string | symbol 
 
 - 返回值：空
 
-```TypeScript
+```ts
 const log: ParameterDecorator = (target: any, propertyKey: string, index: number) => {
   console.log(`${propertyKey} No. ${index} Parameter`);
 };
@@ -228,7 +227,7 @@ f1.member(1, 2);
 
 - 不同类型装饰器执行顺序：实例 -> 静态方法 -> 构造函数 -> 类装饰器
 
-```TypeScript
+```ts
 function decorator(key: string): any {
   return function () {
     console.log('执行: ', key);
@@ -255,7 +254,7 @@ class D {
 ```
 - 同一级别装饰器的执行顺序，按顺序执行，且参数装饰器早于方法装饰器执行
 
-```TypeScript
+```ts
 class E {
   @decorator('方法1')
   m1(@decorator('参数1') foo: any) {}
@@ -281,7 +280,7 @@ new E();
 ```
 - 同一方法有多个装饰器时，装饰器顺序加载，逆序执行
 
-```TypeScript
+```ts
 function fg(key: string): any {
   console.log('加载：', key);
   return function () {
