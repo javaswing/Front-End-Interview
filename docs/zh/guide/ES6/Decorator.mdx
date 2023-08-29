@@ -312,6 +312,84 @@ class G {
 
 标准的语法，参考了阮一峰的[文章](https://wangdoc.com/typescript/decorator)，不知道怎么回事没有找到正确的类型声明。TS验证都不通过，待补充
 
+### 配置
+在5.0之后的版本，`TypeScript`是默认支持。使用**传统的语法**则需要以下配置:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "experimentalDecorators": true
+  }
+}
+```
+
+### 类型定义
+先看下在5.0版本中，对于装饰器的定义:
+
+```TypeScript
+declare type ClassDecorator = <TFunction extends Function>(target: TFunction) => TFunction | void;
+declare type PropertyDecorator = (target: Object, propertyKey: string | symbol) => void;
+declare type MethodDecorator = <T>(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<T>) => TypedPropertyDescriptor<T> | void;
+declare type ParameterDecorator = (target: Object, propertyKey: string | symbol | undefined, parameterIndex: number) => void;
+```
+在该版本中，可以分为4种：类装饰器、属性装饰器，方法装饰器、参数装饰器。让我们快速认识一下他们
+
+```ts
+// 类装饰器
+@ClassDecorator
+class Person {
+
+  // 属性装饰器
+  @PropertyDecorator
+  name: string;
+
+  // 参数装饰器
+  eat(@ParameterDecorator('food') food: string) {
+    console.log(food);
+  }
+
+  // 方法装饰器
+  @MethodDecorator
+  sayHello() {
+    console.log('hello');
+  }
+}
+```
+
+
+
+
+### 类装饰器
+
+```TypeScript
+declare type ClassDecorator = <TFunction extends Function>(target: TFunction) => TFunction | void;
+``
+
+- 参数
+  1. `target`: 类的构造器
+
+- 返回：空或者一个新的构造器函数
+  如果类装饰器返回了一个值，它将会被用来替代原来的类构造器的声明。
+
+``` TypeScript
+function ClassDecoratorService(params?: any): ClassDecorator {
+  return (target: Function) => {
+    console.log('ClassDecoratorService call on :', target);
+    console.log('ClassDecoratorService params: ', params);
+  };
+}
+
+@ClassDecoratorService({ log: 'test' })
+class ClassDecoratorExample {}
+```
+
+输出结果：
+
+```shell
+ClassDecoratorService call on : [Function: ClassDecoratorExample]
+ClassDecoratorService params:  { log: 'test' }
+```
 
 ## 参考
 
