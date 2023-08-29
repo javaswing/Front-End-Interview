@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
+// 该文件为 TypeScript 5.1.6下测试过的语法
 // 1. 类装饰器
 
 function ClassDecoratorService(params?: any): ClassDecorator {

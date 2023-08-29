@@ -7,9 +7,8 @@
 比如:Java中的[`Annotation`](https://www.cnblogs.com/ziph/p/13056092.html)、C#中的[`Attribute`](https://www.cnblogs.com/zuiyirenjian/p/3980608.html)等。
 
 > 由于该特性是目前处于`Stage`阶段，想使用该功能，浏览器都没有支持。在开发中使用一般有两种方法：
-
 > 1. 通过Babel，进行编译通过，插件[@babel/plugin-proposal-decorators](https://babeljs.io/docs/babel-plugin-proposal-decorators)
-  2. 使用`TypeScript`进行编译，（TypeScript在早期的时候本身已经支持`Decorator`，后来由于ECMAScript标准确认时，与早期的语法很有很大的差别。所以在使用时配置是不相同的，见下文）
+> 2. 使用`TypeScript`进行编译，（TypeScript在早期的时候本身已经支持`Decorator`，后来由于ECMAScript标准确认时，与早期的语法很有很大的差别。所以在使用时配置是不相同的，见下文）
 
 > 本文主要在`TypeScript`中使用。演示代码主要在为ts代码.
 
@@ -17,6 +16,301 @@
 
 > 注：以[`TypeScript5.0`](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0/#decorators)版本为界限，在5.0之前TypeScript实现的是[`Stage 2`](https://mirone.me/zh-hans/a-complete-guide-to-typescript-decorator/)的装饰器标准，
 而在5.0及之后是按照[`Satge 3`](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0/#decorators)进行实现的。这里以`Typescript5.0`的版本进行测试
+
+### 配置
+在5.0之后的版本，`TypeScript`是默认支持。使用**传统的语法**则需要以下配置:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "experimentalDecorators": true
+  }
+}
+```
+
+如果要支持元数据，则需要以下配置：
+```json
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}
+```
+这里的`emitDecoratorMetadata`，是用来产生一些装饰器的元数据，供其它的工具或某些模块（[`reflect-metadata`](https://jkchao.github.io/typescript-book-chinese/tips/metadata.html)）使用.
+目前`2023-08-28`时，`TypeScript`官网对于`Decorator`的介绍与是以旧的为主，像`Nest.js`这些框架使用的也是旧的语法
+
+### 类型定义
+先看下在5.0版本中，对于装饰器的定义:
+
+```ts
+declare type ClassDecorator = <TFunction extends Function>(target: TFunction) => TFunction | void;
+declare type PropertyDecorator = (target: Object, propertyKey: string | symbol) => void;
+declare type MethodDecorator = <T>(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<T>) => TypedPropertyDescriptor<T> | void;
+declare type ParameterDecorator = (target: Object, propertyKey: string | symbol | undefined, parameterIndex: number) => void;
+```
+在该版本中，可以分为4种：类装饰器、属性装饰器，方法装饰器、参数装饰器。让我们快速认识一下他们
+
+```ts
+// 类装饰器
+@ClassDecorator
+class Person {
+
+  // 属性装饰器
+  @PropertyDecorator
+  name: string;
+
+  // 参数装饰器
+  eat(@ParameterDecorator('food') food: string) {
+    console.log(food);
+  }
+
+  // 方法装饰器
+  @MethodDecorator
+  sayHello() {
+    console.log('hello');
+  }
+}
+```
+
+### 类饰器
+
+```ts
+declare type ClassDecorator = <TFunction extends Function>(target: TFunction) => TFunction | void;
+```
+
+- 参数
+  1. `target`: 类型参数`TFunction`必须是函数，实际上就是构造方法。
+
+- 返回：
+
+  1. 空
+  2. 一个新的构造器函数，如果类装饰器返回了一个值，它将会被用来替代原来的类构造器的声明。
+
+``` ts
+type Constructor = {
+  new (...args: any[]): {};
+};
+
+function toString<T extends Constructor>(target: T) {
+  return class extends target {
+    toString() {
+      return JSON.stringify(this);
+    }
+  };
+}
+
+@toString
+class ToStringTest {
+  name = 'javaswing';
+}
+
+const t = new ToStringTest();
+console.log(t.toString()); // {"name":"javaswing"}
+```
+
+### 属性装饰器
+
+```ts
+declare type PropertyDecorator = (target: Object, propertyKey: string | symbol) => void;
+```
+
+- 参数
+  1. `target` （对于实例属性）类的原型对象（prototype），或者（对于静态属性）类的构造函数
+  2. `propertyKey` 属性名
+
+- 返回值：空
+
+```ts
+const Valid: (m: number, n: number) => PropertyDecorator = (min: number, max: number) => {
+  return (target: Object, key: string) => {
+    Object.defineProperty(target, key, {
+      set: function (v: number) {
+        if (v < min || v > max) {
+          throw new Error(`value must be between ${min} and ${max}`);
+        }
+      },
+    });
+  };
+};
+
+class Student {
+  @Valid(0, 100)
+  age: number;
+}
+
+const s = new Student();
+
+// s.age = 200;
+// Error: value must be between 0 and 100
+```
+
+### 方法装饰器
+
+```ts
+declare type MethodDecorator = <T>(target: Object, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<T>) => TypedPropertyDescriptor<T> | void;
+```
+
+- 参数
+  1. `target` （对于类的静态方法）类的构造函数，或者（对于类的实例方法）类的原型。
+  2. `propertyKey` 方法名
+  3. `descriptor` 方法的描述对象，类似于`Object.defineProperty`
+
+- 返回
+  1. 处理后的新方法，可以覆盖原始方法
+  2. 空
+
+```ts
+const logger: MethodDecorator = (
+  target: any,
+  propertyKey: string | symbol,
+  descriptor: PropertyDescriptor
+) => {
+  const originalMethod = descriptor.value;
+
+  descriptor.value = function (...args: unknown[]) {
+    console.log('logger 方法执行前打印:', target, propertyKey, args);
+    const result = originalMethod.apply(this, args);
+    console.log('logger 方法执行后打印:', target, propertyKey, args, result);
+    return result;
+  };
+};
+
+class C {
+  @logger
+  add(x: number, y: number) {
+    return x + y;
+  }
+}
+
+new C().add(3, 2);
+// logger 方法执行前打印: {} add [ 3, 2 ]
+// logger 方法执行后打印: {} add [ 3, 2 ] 5
+```
+
+### 参数装饰器
+
+```ts
+declare type ParameterDecorator = (target: Object, propertyKey: string | symbol | undefined, parameterIndex: number) => void;
+```
+
+- 参数
+
+  1. `target` （对于静态方法）类的构造函数，或者（对于类的实例方法）类的原型对象。
+  2. `propertyKey` 调用的该装饰器的方法名
+  3. `parameterIndex` 参数索引
+
+- 返回值：空
+
+```ts
+const log: ParameterDecorator = (target: any, propertyKey: string, index: number) => {
+  console.log(`${propertyKey} No. ${index} Parameter`);
+};
+
+class F {
+  member(@log x: number, @log y: number) {
+    console.log(`member params: ${x}, ${y}`);
+  }
+}
+
+const f1 = new F();
+f1.member(1, 2);
+// member No. 1 Parameter
+// member No. 0 Parameter
+// member params: 1, 2
+```
+
+
+## 执行顺序
+
+- 不同类型装饰器执行顺序：实例 -> 静态方法 -> 构造函数 -> 类装饰器
+
+```ts
+function decorator(key: string): any {
+  return function () {
+    console.log('执行: ', key);
+  };
+}
+
+@decorator('类装饰器')
+class D {
+  name: string;
+  @decorator('静态方法')
+  static method() {}
+
+  @decorator('实例方法')
+  method() {}
+
+  constructor(@decorator('构造函数') name: string) {
+    this.name = name;
+  }
+}
+// 执行:  实例方法
+// 执行:  静态方法
+// 执行:  构造函数
+// 执行:  类装饰器
+```
+- 同一级别装饰器的执行顺序，按顺序执行，且参数装饰器早于方法装饰器执行
+
+```ts
+class E {
+  @decorator('方法1')
+  m1(@decorator('参数1') foo: any) {}
+
+  @decorator('属性1')
+  p1: number;
+
+  @decorator('方法2')
+  m2(@decorator('参数2') foo: any) {}
+
+  @decorator('属性2')
+  p2: number;
+}
+
+new E();
+
+// 执行:  参数1
+// 执行:  方法1
+// 执行:  属性1
+// 执行:  参数2
+// 执行:  方法2
+// 执行:  属性2
+```
+- 同一方法有多个装饰器时，装饰器顺序加载，逆序执行
+
+```ts
+function fg(key: string): any {
+  console.log('加载：', key);
+  return function () {
+    console.log('执行：', key);
+  };
+}
+
+class G {
+  @fg('A')
+  @fg('B')
+  @fg('C')
+  m1() {}
+}
+
+// 加载： A
+// 加载： B
+// 加载： C
+// 执行： C
+// 执行： B
+// 执行： A
+```
+
+## 重要
+
+**装饰器只能用于类和类的方法，不能用于函数。主要是因为函数的提升问题**
+
+
+## TODO
+
+标准的语法，参考了阮一峰的[文章](https://wangdoc.com/typescript/decorator)，不知道怎么回事没有找到正确的类型声明。TS验证都不通过，待补充
 
 ### 配置
 在5.0之后的版本，`TypeScript`是默认支持。使用**传统的语法**则需要以下配置:
@@ -105,3 +399,5 @@ ClassDecoratorService params:  { log: 'test' }
 4. https://github.com/tc39/proposal-decorators
 5. https://devblogs.microsoft.com/typescript/announcing-typescript-5-0/#decorators
 6. https://mirone.me/zh-hans/a-complete-guide-to-typescript-decorator/
+7. https://wangdoc.com/typescript/decorator
+8. https://www.digitalocean.com/community/tutorials/how-to-use-decorators-in-typescript
