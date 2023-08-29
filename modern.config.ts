@@ -58,7 +58,19 @@ export default defineConfig({
     // https://modernjs.dev/doc-tools/zh/api/config/config-basic.html
     base: isProd() ? '/Front-End-Interview/' : '/',
     root: path.join(__dirname, 'docs'),
-    head: [],
+    head: [
+      `
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?08dd1a00b1e317cd0a730370a212193a";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+    `,
+    ],
     // 默认语言
     // Default language
     lang: 'zh',
