@@ -43,7 +43,11 @@ function getSidebarConfig(lang: 'zh' | 'en') {
       },
       {
         text: getText('Javascript相关', 'javascript'),
-        items: [getLink('/guide/javascript/javascript'), getLink('/guide/ES6/Decorator')],
+        items: [
+          getLink('/guide/javascript/javascript'),
+          getLink('/guide/ES6/Decorator'),
+          getLink('/guide/ES6/Promise'),
+        ],
       },
       {
         text: getText('手写代码', 'write-code'),
