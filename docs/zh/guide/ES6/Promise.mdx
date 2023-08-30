@@ -19,8 +19,16 @@
 ### 链式调用(chaining)
 
 在`Promise`中支持链式调用，一个`Promise`对象后面可以有多个`then`进行处理。且`then`之后都会支持传入两个方法
-`onFulfilled`和`onRejected`进行调用，分别对应着成功与失败。
+`onFulfilled`和`onRejected`进行调用，分别对应着成功与失败。且之后可以有多个`then`方法，换个说法其实每个`promise`的then
+方法之后返回的是一个新的`promise`。总结下其规则：
 
+1. 如果上一个then方法中return值，则该值为下一个then的入参。否则为undefined
+2. 如果在then中返回一个新的promise对象，则在该对象resolve或者reject之后，再调用之后的then
+
+
+### catch 方法
+
+该方法会在Promise对象执行，reject时执行
 
 ## 参考
 
