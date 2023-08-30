@@ -28,7 +28,26 @@
 
 ### catch 方法
 
-该方法会在Promise对象执行，reject时执行
+该方法会在Promise对象执行，reject时执行,所以这样实现
+
+```ts
+ catch(onRejected) {
+    this.then(null, onRejected);
+  }
+```
+
+### 其它的Promise方法
+
+1. `Promise.all` 传入一个数组`Promise`对象，所有对象`resolve`时，再返回。只要有一个`reject`整个对象都变为`reject`
+
+2. `Promise.race` 任意一个`Promise`对象被`resolve`时整体被`resolve`，任意一个Promise变成为`reject`整体被`reject`
+
+3. `Promise.reject` 返回一个新的`Promise`对象，该对象以给定的理由`reject`
+
+4. `Promise.resolve` 返回一个新的`Promise`对象，该对象给给定的值`resolve`，如果该值还是一个包含then的值，则会执行到该值的resove阶段
+ 通常，如果你不知道一个值是不是Promise，那么最好使用Promise.resolve(value)将这个值转换为Promise对象，按Promise的方式进行处理
+
+最后上完整的代码链接：https://github.com/javaswing/Front-End-Interview/blob/master/code/ES6/Promise/index.ts
 
 ## 参考
 
@@ -38,3 +57,4 @@
 4. https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise
 5. https://yes-1-am.gitbook.io/blog/javascript/shou-xie-promise-ji-xiang-guan-dai-ma-li-jie
 6. https://github.com/domenic/promise-tests/blob/master/lib/tests/promises-a.js
+7. https://github.com/stefanpenner/es6-promise
