@@ -1,6 +1,4 @@
-function hello() {
-  console.log('hello world');
-  return 'hello';
-}
+const Data = require('./data.txt');
 
-export { hello };
+const msgElement = document.querySelector('#message');
+msgElement.innerText = Data;
